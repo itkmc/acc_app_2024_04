@@ -1,5 +1,6 @@
 package com.koreait.exam.acc_app_2024_04.app.handler;
 
+import com.koreait.exam.acc_app_2024_04.app.security.dto.MemberContext;
 import com.koreait.exam.acc_app_2024_04.util.Ut;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.DefaultRedirectStrategy;
