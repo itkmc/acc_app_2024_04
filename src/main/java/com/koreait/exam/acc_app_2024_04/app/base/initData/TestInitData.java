@@ -1,5 +1,6 @@
 package com.koreait.exam.acc_app_2024_04.app.base.initData;
 
+import com.koreait.exam.acc_app_2024_04.app.member.service.MemberService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,9 +10,9 @@ import org.springframework.context.annotation.Profile;
 @Profile("test")
 public class TestInitData implements InitDataBefore {
    @Bean
-   CommandLineRunner initData() {
+   CommandLineRunner initData(MemberService memberService) {
       return args -> {
-         before();
+         before(memberService);
       };
    }
 }
