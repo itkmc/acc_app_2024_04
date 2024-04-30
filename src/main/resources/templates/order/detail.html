@@ -17,21 +17,21 @@
     </script>
 
     <script>
-        const tossPayments = TossPayments("test_ck_6bJXmgo28eAvPkRKgOQE8LAnGKWx");
+        const tossPayments = TossPayments("test_ck_KNbdOvk5rkWB0GdRDRGqrn07xlzm");
 
-        function payment(){
+        function payment() {
             const method = "카드"; // 카드 or 가상계좌
 
-            const paymentData ={
+            const paymentData = {
                 amount: orderPayPrice,
-                orderId: "order__" + orderId,
+                orderId: "order__" + orderId + "__" +(Math.random() + "").substring(2),
                 orderName,
                 customerName: buyerName,
-                successUrl: window.location.origin + "/success",
-                failUrl: window.location.origin + "/fail",
+                successUrl: window.location.origin + "/order/" + orderId + "/success",
+                failUrl: window.location.origin + "/order/" + orderId + "/fail",
             };
 
-            tossPayments.requestPayment(method,paymentData);
+            tossPayments.requestPayment(method, paymentData);
         }
 
     </script>
