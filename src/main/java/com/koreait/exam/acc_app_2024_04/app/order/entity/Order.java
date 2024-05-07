@@ -87,4 +87,11 @@ public class Order extends BaseEntity {
 
       this.name = name;
    }
+
+   public boolean payable() {
+      if (isPaid) return false;
+      if (isCanceled) return false;
+
+      return true;
+   }
 }
