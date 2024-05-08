@@ -114,6 +114,28 @@
 
             tossPayments.requestPayment(method, paymentData);
         }
+
+        function restcashonly() {
+            let useRestCash = parseInt($PaymentForm__useRestCash.val());
+
+            if (orderPayPrice == useRestCash) {
+                document.payByRestCashOnlyForm.submit();
+                return;
+            }
+
+            const method = "예치금"; // "카드" 혹은 "가상계좌"
+
+            const paymentData = {
+                amount: orderPayPrice - useRestCash,
+                orderId: "order__" + orderId + "__" + (Math.random() + "").substring(2),
+                orderName,
+                customerName: buyerName,
+                successUrl: window.location.origin + "/order/" + orderId + "/success",
+                failUrl: window.location.origin + "/order/" + orderId + "/fail"
+            };
+
+            tossPayments.requestRestCashPay(method, paymentData);
+        }
     </script>
 
     <script>

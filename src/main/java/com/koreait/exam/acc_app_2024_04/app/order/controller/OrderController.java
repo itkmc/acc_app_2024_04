@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.koreait.exam.acc_app_2024_04.app.member.entity.Member;
 import com.koreait.exam.acc_app_2024_04.app.member.service.MemberService;
 import com.koreait.exam.acc_app_2024_04.app.order.entity.Order;
+import com.koreait.exam.acc_app_2024_04.app.order.exception.ActorCanNotPaymentOrderException;
 import com.koreait.exam.acc_app_2024_04.app.order.exception.ActorCanNotSeeOrderException;
 import com.koreait.exam.acc_app_2024_04.app.order.exception.OrderIdNotMatchedException;
 import com.koreait.exam.acc_app_2024_04.app.order.service.OrderService;
@@ -37,6 +38,24 @@ public class OrderController {
    private final RestTemplate restTemplate = new RestTemplate();
    private final ObjectMapper objectMapper;
    private final MemberService memberService;
+
+   @GetMapping("/{id}/payByRestCashOnly")
+   @PreAuthorize("isAuthenticated()")
+   public String payByRestCashOnly(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
+      Order order = orderService.findForPrintById(id).get();
+
+      Member actor = memberContext.getMember();
+
+      long restCash = memberService.getRestCash(actor);
+
+      if (orderService.actorCanPayment(actor, order) == false) {
+         throw new ActorCanNotPaymentOrderException();
+      }
+
+      orderService.payByRestCashOnly(order);
+
+      return "redirect:/order/%d?msg=%s".formatted(order.getId(), Ut.url.encode("예치금으로 결제가 완료되었습니다"));
+   }
 
    @GetMapping("/{id}")
    @PreAuthorize("isAuthenticated()")
