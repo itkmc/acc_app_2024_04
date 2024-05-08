@@ -8,6 +8,7 @@ import com.koreait.exam.acc_app_2024_04.app.order.entity.Order;
 import com.koreait.exam.acc_app_2024_04.app.order.exception.ActorCanNotPaymentOrderException;
 import com.koreait.exam.acc_app_2024_04.app.order.exception.ActorCanNotSeeOrderException;
 import com.koreait.exam.acc_app_2024_04.app.order.exception.OrderIdNotMatchedException;
+import com.koreait.exam.acc_app_2024_04.app.order.exception.OrderNotEnoughRestCashException;
 import com.koreait.exam.acc_app_2024_04.app.order.service.OrderService;
 import com.koreait.exam.acc_app_2024_04.app.security.dto.MemberContext;
 import com.koreait.exam.acc_app_2024_04.util.Ut;
@@ -18,10 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -39,7 +37,7 @@ public class OrderController {
    private final ObjectMapper objectMapper;
    private final MemberService memberService;
 
-   @GetMapping("/{id}/payByRestCashOnly")
+   @PostMapping("/{id}/payByRestCashOnly")
    @PreAuthorize("isAuthenticated()")
    public String payByRestCashOnly(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
       Order order = orderService.findForPrintById(id).get();
@@ -76,7 +74,7 @@ public class OrderController {
       return "order/detail";
    }
 
-   private final String SECRET_KEY = "test_sk_6bJXmgo28eBnx5GDX4Nj3LAnGKWx";
+   private final String SECRET_KEY = "test_sk_6bJXmgo28eBnx5GDX4Nj3LAnGKWx:";
 
    @PostConstruct
    private void init() {
@@ -98,7 +96,8 @@ public class OrderController {
        @RequestParam String paymentKey,
        @RequestParam String orderId,
        @RequestParam Long amount,
-       Model model
+       Model model,
+       @AuthenticationPrincipal MemberContext memberContext
    ) throws Exception {
 
       Order order = orderService.findForPrintById(id).get();
@@ -116,7 +115,15 @@ public class OrderController {
 
       Map<String, String> payloadMap = new HashMap<>();
       payloadMap.put("orderId", orderId);
-      payloadMap.put("amount", String.valueOf(order.calculatePayPrice()));
+      payloadMap.put("amount", String.valueOf(amount));
+
+      Member actor = memberContext.getMember();
+      long restCash = memberService.getRestCash(actor);
+      long payPriceRestCash = order.calculatePayPrice() - amount;
+
+      if (payPriceRestCash > restCash) {
+         throw new OrderNotEnoughRestCashException();
+      }
 
       HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(payloadMap), headers);
 
@@ -125,7 +132,7 @@ public class OrderController {
 
       if (responseEntity.getStatusCode() == HttpStatus.OK) {
 
-         orderService.payByTossPayments(order);
+         orderService.payByTossPayments(order, payPriceRestCash);
 
 //            JsonNode successNode = responseEntity.getBody();
 //            model.addAttribute("orderId", successNode.get("orderId").asText());
