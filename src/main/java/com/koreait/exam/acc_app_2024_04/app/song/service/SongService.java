@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,10 +19,10 @@ public class SongService {
    @Transactional
    public Song create(Member author, String subject, String content) {
       Song song = Song.builder()
-          .subject(subject)
-          .content(content)
-          .author(author)
-          .build();
+              .subject(subject)
+              .content(content)
+              .author(author)
+              .build();
       songRepository.save(song);
 
       return song;
@@ -51,5 +52,9 @@ public class SongService {
       if (opSong.isEmpty()) return opSong;
 
       return opSong;
+   }
+
+   public List<Song> findAllByAuthorId(Long id) {
+      return songRepository.findAllByAuthorId(id);
    }
 }
