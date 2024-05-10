@@ -16,11 +16,11 @@ import java.util.List;
 
 public interface InitDataBefore {
    default void before(
-       MemberService memberService,
-       SongService songService,
-       ProductService productService,
-       CartService cartService,
-       OrderService orderService) {
+           MemberService memberService,
+           SongService songService,
+           ProductService productService,
+           CartService cartService,
+           OrderService orderService) {
 
       class Helper {
          public Order order(Member member, List<Product> products) {
@@ -73,6 +73,14 @@ public interface InitDataBefore {
 
       // 3번 주문 : 결제 전
       Order order3 = helper.order(member2, Arrays.asList(product1, product2));
+
+      // 장바구니
+      cartService.addItem(member1, product1);
+      cartService.addItem(member1, product2);
+      cartService.addItem(member1, product3);
+
+      cartService.addItem(member2, product4);
+      cartService.addItem(member2, product5);
 
    }
 }
