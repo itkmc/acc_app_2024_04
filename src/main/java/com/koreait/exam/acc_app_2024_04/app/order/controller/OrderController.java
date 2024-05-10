@@ -74,7 +74,7 @@ public class OrderController {
       return "order/detail";
    }
 
-   private final String SECRET_KEY = "test_sk_LkKEypNArWJezMP91J5zVlmeaxYG";
+   private final String SECRET_KEY = "test_sk_6bJXmgo28eBnx5GDX4Nj3LAnGKWx:";
 
    @PostConstruct
    private void init() {
@@ -92,12 +92,12 @@ public class OrderController {
 
    @RequestMapping("/{id}/success")
    public String confirmPayment(
-       @PathVariable long id,
-       @RequestParam String paymentKey,
-       @RequestParam String orderId,
-       @RequestParam Long amount,
-       Model model,
-       @AuthenticationPrincipal MemberContext memberContext
+           @PathVariable long id,
+           @RequestParam String paymentKey,
+           @RequestParam String orderId,
+           @RequestParam Long amount,
+           Model model,
+           @AuthenticationPrincipal MemberContext memberContext
    ) throws Exception {
 
       Order order = orderService.findForPrintById(id).get();
@@ -128,7 +128,7 @@ public class OrderController {
       HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(payloadMap), headers);
 
       ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(
-          "https://api.tosspayments.com/v1/payments/" + paymentKey, request, JsonNode.class);
+              "https://api.tosspayments.com/v1/payments/" + paymentKey, request, JsonNode.class);
 
       if (responseEntity.getStatusCode() == HttpStatus.OK) {
 
@@ -151,6 +151,16 @@ public class OrderController {
       model.addAttribute("message", message);
       model.addAttribute("code", code);
       return "order/fail";
+   }
+
+   @PostMapping("/makeOrder")
+   @PreAuthorize("isAuthenticated()")
+   public String makeOrder(@AuthenticationPrincipal MemberContext memberContext) {
+      Member member = memberContext.getMember();
+      Order order = orderService.createFromCart(member);
+      String redirect = "redirect:/order/%d".formatted(order.getId()) + "?msg=" + Ut.url.encode("%d번 주문이 생성되었습니다.".formatted(order.getId()));
+
+      return redirect;
    }
 
 }
