@@ -86,6 +86,24 @@
                     음원 업로드
                 </span>
             </a>
+            <a href="/song/list" class="inline-flex" sec:authorize="isAuthenticated()">
+                <i class="fa-solid fa-upload"></i>
+                <span class="ml-[2px] hidden sm:block">
+                    음원 리스트
+                </span>
+            </a>
+            <a href="/product/create" class="inline-flex" sec:authorize="isAuthenticated()">
+                <i class="fa-solid fa-upload"></i>
+                <span class="ml-[2px] hidden sm:block">
+                    상품등록
+                </span>
+            </a>
+            <a href="/cart/items" class="inline-flex" sec:authorize="isAuthenticated()">
+                <i class="fa-solid fa-upload"></i>
+                <span class="ml-[2px] hidden sm:block">
+                    장바구니
+                </span>
+            </a>
         </div>
     </div>
 </header>
